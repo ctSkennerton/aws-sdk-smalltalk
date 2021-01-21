@@ -23,15 +23,17 @@ AWSClientCreator >> createFromJson: aDictionary [
 	
 	newService comment: (aDictionary at: 'documentation') escapeComment .
 	
+	self initializeClassVariables: (aDictionary at: 'metadata') service: newService. 
+	
 	(aDictionary at: 'operations') valuesDo: [ :i |
-		self createMessage: i For: newService.	
+		self createMessage: i service: newService.	
 	]
 			
 	
 ]
 
 { #category : #creation }
-AWSClientCreator >> createMessage: messageData For: service [
+AWSClientCreator >> createMessage: messageData service: service [
 	| msgStream |
 	msgStream := WriteStream with: String new.
 	msgStream nextPutAll: (self toCamelCase: (messageData at: 'name')).
@@ -57,6 +59,27 @@ AWSClientCreator >> formatComment: aString [
 { #category : #initialization }
 AWSClientCreator >> initialize [
 	removePreviouslyDefinedClasses := true.
+]
+
+{ #category : #creation }
+AWSClientCreator >> initializeClassVariables: metadataDictionary service: aService [
+	"Create and initialize class method that takes the metadata associated with this service"
+	| msgStream |
+	msgStream := WriteStream with: String new.
+	msgStream nextPutAll: 'initialize';
+		crtab.
+	
+	metadataDictionary associationsDo: [ :pair | 
+		msgStream nextPutAll: pair key;
+			nextPutAll: ' := ''';
+			nextPutAll: pair value;
+			nextPutAll: '''.';
+			crtab.
+			
+		].
+	
+	aService class compile: msgStream contents
+	
 ]
 
 { #category : #formatting }
