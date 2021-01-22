@@ -8,18 +8,23 @@ Class {
 }
 
 { #category : #creation }
+AWSClientCreator >> createClassMessage: messageData service: aService [
+]
+
+{ #category : #creation }
 AWSClientCreator >> createFromJson: aDictionary [
 	"Create an AWS client from a template JSON object provided by AWS.
 	
 	 The input dictionary must contain 5 top-level keys: operations, version, shapes, 
 	 metadata, documentation.
 	"
-	| newService |
+	| newService serviceId |
 	
-	newService := Object subclass: ('AWS' , ((aDictionary at: 'metadata') at: 'serviceId'), 'Client') asSymbol
+	serviceId := ((aDictionary at: 'metadata') at: 'serviceId').
+	newService := AWSClient subclass: ('AWS' , serviceId, 'Client') asSymbol
 	       instanceVariableNames: ''
 			 classVariableNames: (' ' join: (aDictionary at: 'metadata') keys)
-			 package: 'AWS-Service'.
+			 package: 'AWS-', serviceId, '-core'.
 	
 	newService comment: (aDictionary at: 'documentation') escapeComment .
 	
