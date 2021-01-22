@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'settingsDict'
 	],
-	#category : 'AWS-Core'
+	#category : #'AWS-Core'
 }
 
 { #category : #'instance creation' }
@@ -55,7 +55,7 @@ AWSConfig >> at: key put: value [
 { #category : #defaults }
 AWSConfig >> defaultRegionName [
 	"AWS Regions Asia Pacific (Tokyo)"
-	^ 'ap-northeast-1'.
+	^ ''.
 ]
 
 { #category : #defaults }
