@@ -11,6 +11,17 @@ Class {
 AWSClientCreator >> createClassMessage: messageData service: aService [
 ]
 
+{ #category : #'as yet unclassified' }
+AWSClientCreator >> createEnpointAccessor: service [
+	| msgStream |
+	msgStream := WriteStream with: String new.
+	msgStream nextPutAll: 'endpoint';
+		crtab;
+		nextPutAll: '^ endpointPrefix.'.
+	msgStream crtab.
+	service compile: msgStream contents
+]
+
 { #category : #creation }
 AWSClientCreator >> createFromJson: aDictionary [
 	"Create an AWS client from a template JSON object provided by AWS.
