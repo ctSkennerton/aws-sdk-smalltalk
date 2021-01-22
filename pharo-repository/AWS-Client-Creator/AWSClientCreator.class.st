@@ -21,7 +21,7 @@ AWSClientCreator >> createFromJson: aDictionary [
 	| newService serviceId |
 	
 	serviceId := ((aDictionary at: 'metadata') at: 'serviceId').
-	newService := AWSClient subclass: ('AWS' , serviceId, 'Client') asSymbol
+	newService := AWSService subclass: ('AWS' , serviceId) asSymbol
 	       instanceVariableNames: ''
 			 classVariableNames: (' ' join: (aDictionary at: 'metadata') keys)
 			 package: 'AWS-', serviceId, '-core'.
@@ -29,6 +29,8 @@ AWSClientCreator >> createFromJson: aDictionary [
 	newService comment: (aDictionary at: 'documentation') escapeComment .
 	
 	self initializeClassVariables: (aDictionary at: 'metadata') service: newService. 
+	
+	self createEnpointAccessor: newService.
 	
 	(aDictionary at: 'operations') valuesDo: [ :i |
 		self createMessage: i service: newService.	
