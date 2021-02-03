@@ -52,17 +52,29 @@ AWSClientCreator >> createFromJson: aDictionary [
 
 { #category : #creation }
 AWSClientCreator >> createMessage: messageData service: service [
-	| msgStream |
+	| msgStream msgName msgInputName |
+	msgName := self toCamelCase: (messageData at: 'name').
+	msgInputName := 'a', ((messageData at: 'input') at: 'shape').
 	msgStream := WriteStream with: String new.
-	msgStream nextPutAll: (self toCamelCase: (messageData at: 'name')).
+	msgStream nextPutAll: msgName .
 	msgStream
-		nextPutAll: ': a';
-		nextPutAll: ((messageData at: 'input') at: 'shape').
-	msgStream crtab.
-	msgStream nextPut: $".
-	msgStream nextPutAll: (messageData at: 'documentation') escapeComment .
-	msgStream nextPut: $".
-	msgStream crtab.
+		nextPutAll: ': ';
+		nextPutAll: msgInputName;
+		crtab;
+	 	nextPut: $";
+	 	nextPutAll: (messageData at: 'documentation') escapeComment ;
+	 	nextPut: $";
+	 	crtab;
+		crtab;
+		nextPutAll: '| request url |';
+		crtab;
+		crtab;
+		nextPutAll: 'url := ''', ((messageData at: 'http') at: 'requestUri'), '''.';
+		crtab;
+	 	nextPutAll: 'request := self createRequest: ', msgInputName ,' url: url method: #', ((messageData at: 'http') at: 'method') ,' .';
+	 	crtab;
+		nextPutAll: '^ self client request: request andOption: nil.'.
+		
 	service compile: msgStream contents
 ]
 
