@@ -8,18 +8,18 @@ Class {
 }
 
 { #category : #creation }
-AWSClientCreator >> createClassMessage: messageData service: aService [
-]
-
-{ #category : #'as yet unclassified' }
-AWSClientCreator >> createEnpointAccessor: service [
+AWSClientCreator >> createAccessor: name value: val service: service [
 	| msgStream |
 	msgStream := WriteStream with: String new.
-	msgStream nextPutAll: 'endpoint';
+	msgStream nextPutAll: name;
 		crtab;
-		nextPutAll: '^ endpointPrefix.'.
+		nextPutAll: '^ ''',val, '''.'.
 	msgStream crtab.
 	service compile: msgStream contents
+]
+
+{ #category : #creation }
+AWSClientCreator >> createClassMessage: messageData service: aService [
 ]
 
 { #category : #creation }
@@ -39,19 +39,19 @@ AWSClientCreator >> createFromJson: aDictionary [
 	
 	newService comment: (aDictionary at: 'documentation') escapeComment .
 	
-	self initializeClassVariables: (aDictionary at: 'metadata') service: newService. 
+	"self initializeClassVariables: (aDictionary at: 'metadata') service: newService."
 	
-	self createEnpointAccessor: newService.
+	self createAccessor: 'endpoint' value: ((aDictionary at: 'metadata') at: 'endpointPrefix') service: newService.
 	
 	(aDictionary at: 'operations') valuesDo: [ :i |
-		self createMessage: i service: newService.	
+		self createOperation: i service: newService.	
 	]
 			
 	
 ]
 
 { #category : #creation }
-AWSClientCreator >> createMessage: messageData service: service [
+AWSClientCreator >> createOperation: messageData service: service [
 	| msgStream msgName msgInputName |
 	msgName := self toCamelCase: (messageData at: 'name').
 	msgInputName := 'a', ((messageData at: 'input') at: 'shape').
@@ -75,7 +75,7 @@ AWSClientCreator >> createMessage: messageData service: service [
 	 	crtab;
 		nextPutAll: '^ self client request: request andOption: nil.'.
 		
-	service compile: msgStream contents
+	service compile: msgStream contents classified: 'operations'.
 ]
 
 { #category : #formatting }
