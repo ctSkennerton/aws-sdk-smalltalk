@@ -74,11 +74,6 @@ AWSConfig >> endpoint: anObject [
 ]
 
 { #category : #accessing }
-AWSConfig >> hostUrl [
-	^self at: #hostUrl ifAbsent: [ self hostUrl: self serviceName asLowercase,'.', self regionName, '.amazonaws.com'. ]
-]
-
-{ #category : #accessing }
 AWSConfig >> hostUrl: anObject [
 	self settingsDict removeKey: #endpoint ifAbsent: [  ].
 	^ self at: #hostUrl put: anObject
