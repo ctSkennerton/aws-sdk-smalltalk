@@ -37,7 +37,7 @@ AWSClientCreator >> createFromJson: aDictionary [
 			 classVariableNames: ''
 			 package: 'AWS-', serviceId, '-core'.
 	
-	newService comment: (aDictionary at: 'documentation') escapeComment .
+	newService comment: (self formatComment: (aDictionary at: 'documentation') escapeComment ).
 	
 	self initializeClassMessages: (aDictionary at: 'metadata') service: newService.
 	
@@ -62,7 +62,7 @@ AWSClientCreator >> createOperation: messageData service: service [
 		nextPutAll: msgInputName;
 		crtab;
 	 	nextPut: $";
-	 	nextPutAll: (messageData at: 'documentation') escapeComment ;
+	 	nextPutAll: (self formatComment: (messageData at: 'documentation') escapeComment) ;
 	 	nextPut: $";
 	 	crtab;
 		crtab;
@@ -82,8 +82,7 @@ AWSClientCreator >> createOperation: messageData service: service [
 AWSClientCreator >> formatComment: aString [
 	"I take the documentation in the AWS specification and convert it into Markdown to be added to class and selector comments."	
 	
-	"We make the assumption that there is a single <html> and single <body>"
-	aString parseHTML firstElement firstElement 
+	^(aString copyReplaceAll: '<p>' with:'') copyReplaceAll: '</p>' with: (String with: Character cr with: Character cr). 
 ]
 
 { #category : #initialization }
