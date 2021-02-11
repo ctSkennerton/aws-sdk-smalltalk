@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : #accessing }
+AWSService class >> endpointPrefix [
+
+	self subclassResponsibility .
+]
+
+{ #category : #accessing }
 AWSService >> amzDatePrintString [
 	^ DateAndTime amzDatePrintString
 	
@@ -65,14 +71,8 @@ AWSService >> defaultResponseClass [
 ]
 
 { #category : #accessing }
-AWSService >> endpoint [ 
-
-	self subclassResponsibility .
-]
-
-{ #category : #accessing }
 AWSService >> hostUrl [
-	^self endpoint,'.', self client awsConfig regionName, '.amazonaws.com'.
+	^self class endpointPrefix,'.', self client awsConfig regionName, '.amazonaws.com'.
 ]
 
 { #category : #private }
