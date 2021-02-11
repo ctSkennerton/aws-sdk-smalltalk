@@ -5,7 +5,7 @@ Class {
 		'awsConfig',
 		'httpClient'
 	],
-	#category : 'AWS-Core'
+	#category : #'AWS-Core'
 }
 
 { #category : #'instance creation' }
@@ -74,6 +74,7 @@ AWSClient >> request: request andOption: anObject [
 	awsConfig useSSL
 		ifFalse: [ url scheme: #http ].
 	client url: url.
+	client contentType: (request headers at: 'content-type').
 	client execute.
 	^ client response
 ]
