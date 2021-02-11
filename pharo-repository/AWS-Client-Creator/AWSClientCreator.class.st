@@ -34,14 +34,14 @@ AWSClientCreator >> createFromJson: aDictionary [
 	serviceId := ((aDictionary at: 'metadata') at: 'serviceId').
 	newService := AWSService subclass: ('AWS' , serviceId) asSymbol
 	       instanceVariableNames: ''
-			 classVariableNames: (' ' join: (aDictionary at: 'metadata') keys)
+			 classVariableNames: ''
 			 package: 'AWS-', serviceId, '-core'.
 	
 	newService comment: (aDictionary at: 'documentation') escapeComment .
 	
-	"self initializeClassVariables: (aDictionary at: 'metadata') service: newService."
+	self initializeClassMessages: (aDictionary at: 'metadata') service: newService.
 	
-	self createAccessor: 'endpoint' value: ((aDictionary at: 'metadata') at: 'endpointPrefix') service: newService.
+	"self createAccessor: 'endpoint' value: ((aDictionary at: 'metadata') at: 'endpointPrefix') service: newService."
 	
 	(aDictionary at: 'operations') valuesDo: [ :i |
 		self createOperation: i service: newService.	
@@ -71,7 +71,7 @@ AWSClientCreator >> createOperation: messageData service: service [
 		crtab;
 		nextPutAll: 'url := ''', ((messageData at: 'http') at: 'requestUri'), '''.';
 		crtab;
-	 	nextPutAll: 'request := self createRequest: ', msgInputName ,' url: url method: #', ((messageData at: 'http') at: 'method') ,' .';
+	 	nextPutAll: 'request := self createRequest: ', msgInputName ,' url: url method: #', ((messageData at: 'http') at: 'method') ,' target: self class targetPrefix, ''.', (messageData at: 'name') ,'''.';
 	 	crtab;
 		nextPutAll: '^ self client request: request andOption: nil.'.
 		
@@ -92,23 +92,31 @@ AWSClientCreator >> initialize [
 ]
 
 { #category : #creation }
-AWSClientCreator >> initializeClassVariables: metadataDictionary service: aService [
+AWSClientCreator >> initializeClassMessages: metadataDictionary service: aService [
 	"Create and initialize class method that takes the metadata associated with this service"
-	| msgStream |
-	msgStream := WriteStream with: String new.
-	msgStream nextPutAll: 'initialize';
+	
+	| contentTypeStream |
+	
+	contentTypeStream := WriteStream with: String new.
+	contentTypeStream nextPutAll: 'contentType' ;
+		crtab;
+		nextPutAll: '^ ''application/x-amz-', (metadataDictionary at: 'protocol'),'-', (metadataDictionary at: (metadataDictionary at: 'protocol'),'Version'), '''.';
 		crtab.
+	aService class compile: contentTypeStream contents.
 	
 	metadataDictionary associationsDo: [ :pair | 
-		msgStream nextPutAll: pair key;
-			nextPutAll: ' := ''';
-			nextPutAll: pair value;
-			nextPutAll: '''.';
+		|  msgStream |
+		msgStream := WriteStream with: String new.
+		msgStream nextPutAll: pair key ;
+			crtab;
+			nextPutAll: '^ ''', pair value, '''.';
 			crtab.
-			
+		aService class compile: msgStream contents.
 		].
 	
-	aService class compile: msgStream contents
+	
+	
+	
 	
 ]
 

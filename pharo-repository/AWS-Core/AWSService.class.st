@@ -50,6 +50,26 @@ AWSService >> createRequest: aRequestBody url: url method: method [
 	^ request 
 ]
 
+{ #category : #private }
+AWSService >> createRequest: aRequestBody url: url method: method target: target [
+	| datetimeString request |
+	datetimeString := DateAndTime amzDatePrintString.
+	
+	
+	request := ZnRequest empty.
+	request method: method.
+	request url: url.
+
+	request entity:(ZnEntity with: aRequestBody type: (ZnMimeType textPlain)). 
+	request headers at:'host' put: self hostUrl.
+	"request headers at:'x-amz-content-sha256' put: (SHA256 new hashMessage: aRequestBody) hex."
+	request headers at:'x-amz-date' put: datetimeString.
+	request headers at: 'X-Amz-Target' put: target.
+	request headers at: 'content-type' put: self class contentType.
+	request setAuthorization: ( SignatureV4 creatAuthorization: request andConfig: self client awsConfig andDateTime: datetimeString andOption: nil ) .
+	^ request 
+]
+
 { #category : #defaults }
 AWSService >> defaultClient [
 	^ self defaultClientClass awsConfig: self awsConfig
