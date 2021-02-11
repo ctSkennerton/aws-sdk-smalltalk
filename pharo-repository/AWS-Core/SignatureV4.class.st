@@ -1,7 +1,7 @@
 Class {
 	#name : #SignatureV4,
 	#superclass : #Object,
-	#category : 'AWS-Core'
+	#category : #'AWS-Core'
 }
 
 { #category : #creating }
@@ -31,11 +31,10 @@ SignatureV4 >> creatCanonicalHeaders: request [
 	| headers canonicalHeadersString |
 	headers := Dictionary new.
 
-	request headers keysAndValuesDo: [ :k :v |
-		(k ~= 'Accept') ifTrue:[
-			headers at: k put: v.
+	{'host'. 'content-type'. 'x-amz-target'. 'x-amz-date'} do: [  :header |
+		headers at: header put: (request headers at: header ifAbsent: []).
 		].
-	  ].
+	
 
 	canonicalHeadersString :=  String streamContents:[:s|
 		headers keysSortedSafely do:[:key | 
@@ -165,12 +164,9 @@ SignatureV4 >> createSign: request andConfig: awsConfig andDateTime: datetimeStr
 SignatureV4 >> createSignHeaders: request [
 	| headers signHeadersString |
 	headers := Dictionary new.
-
-	request headers keysAndValuesDo: [ :k :v |
-		(k ~= 'Accept') ifTrue:[
-			headers at: k put: v.
+	{'host'. 'content-type'. 'x-amz-target'. 'x-amz-date'} do: [  :header |
+		headers at: header put: (request headers at: header ifAbsent: []).
 		].
-	  ].
 
 	signHeadersString :=  String streamContents:[:s|
 		headers keysSortedSafely do:[:key | 
