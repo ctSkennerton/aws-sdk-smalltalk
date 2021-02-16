@@ -53,6 +53,11 @@ AWSConfig >> at: key put: value [
 ]
 
 { #category : #defaults }
+AWSConfig >> defaultProfileName [
+	^ 'default'
+]
+
+{ #category : #defaults }
 AWSConfig >> defaultRegionName [
 	"AWS Regions Asia Pacific (Tokyo)"
 	^ ''.
@@ -77,6 +82,41 @@ AWSConfig >> endpoint: anObject [
 AWSConfig >> hostUrl: anObject [
 	self settingsDict removeKey: #endpoint ifAbsent: [  ].
 	^ self at: #hostUrl put: anObject
+]
+
+{ #category : #initialization }
+AWSConfig >> initialize [
+	self populateFromConfig.
+]
+
+{ #category : #initialization }
+AWSConfig >> populateFromConfig [
+	"Read configuration values from ~/.aws/config and ~/.aws/credentials files"
+
+	| configFile credentialFile configData |
+	configFile := FileLocator home / '.aws' / 'config'.
+	configFile exists
+		ifTrue: [ configData := (IniReader on: configFile readStream) parse.
+			self regionName: (configData at: self profileName at: 'region') ].
+	
+	credentialFile := FileLocator home / '.aws' / 'credentials'.
+	credentialFile exists ifTrue: [ 
+		configData := (IniReader on: credentialFile readStream) parse.
+		self
+		accessKeyId: (configData at: self profileName at: 'aws_access_key_id').
+	self
+		secretKey: (configData at: self profileName at: 'aws_secret_access_key')
+		 ].
+]
+
+{ #category : #accessing }
+AWSConfig >> profileName [
+	^ self at: #profileName ifAbsentPut: [ self defaultProfileName ]
+]
+
+{ #category : #accessing }
+AWSConfig >> profileName: anObject [
+	^ self at: #profileName put: anObject
 ]
 
 { #category : #accessing }
